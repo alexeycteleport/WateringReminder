@@ -7,8 +7,11 @@ export function startWateringChecker(bot: Bot) {
     const plants = await convex.query(api.plants.getPlantsToWater);
 
     for (const plant of plants) {
-      const message = `🌱 Time to water "${plant.name}"!`;
+      const message = `🌱 Пора полить "${plant.name}"!`;
 
+      let imageBuffer: Buffer | null = null;
+
+      // Fetch image once if exists
       if (plant.imageId) {
         const imageUrl = await convex.query(api.plants.getImageUrl, {
           storageId: plant.imageId,
@@ -16,19 +19,28 @@ export function startWateringChecker(bot: Bot) {
         if (imageUrl) {
           try {
             const response = await fetch(imageUrl);
-            const buffer = Buffer.from(await response.arrayBuffer());
-            await bot.api.sendPhoto(plant.chatId, new InputFile(buffer, "plant.jpg"), {
-              caption: message,
-            });
+            imageBuffer = Buffer.from(await response.arrayBuffer());
           } catch (error) {
-            console.error("Failed to send photo:", error);
-            await bot.api.sendMessage(plant.chatId, message);
+            console.error("Failed to fetch image:", error);
           }
-        } else {
-          await bot.api.sendMessage(plant.chatId, message);
         }
-      } else {
-        await bot.api.sendMessage(plant.chatId, message);
+      }
+
+      // Send notification to all users
+      for (const user of plant.users) {
+        try {
+          if (imageBuffer) {
+            await bot.api.sendPhoto(
+              user.chatId,
+              new InputFile(imageBuffer, "plant.jpg"),
+              { caption: message }
+            );
+          } else {
+            await bot.api.sendMessage(user.chatId, message);
+          }
+        } catch (error) {
+          console.error(`Failed to notify user ${user.userId}:`, error);
+        }
       }
 
       await convex.mutation(api.plants.markWatered, { plantId: plant._id });

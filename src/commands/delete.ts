@@ -23,7 +23,7 @@ export function registerDeleteCommands(bot: Bot) {
     }
 
     const plant = userPlants[num - 1];
-    await convex.mutation(api.plants.remove, { plantId: plant._id });
+    await convex.mutation(api.plants.remove, { plantId: plant._id, userId });
 
     return ctx.reply(`Deleted "${plant.name}"`);
   });

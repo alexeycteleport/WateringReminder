@@ -4,18 +4,23 @@ import { convex } from "./lib/convex";
 import { startWateringChecker } from "./lib/watering";
 import { registerAddCommands } from "./commands/add";
 import { registerDeleteCommands } from "./commands/delete";
+import { registerShareCommands } from "./commands/share";
+import { registerJoinCommands } from "./commands/join";
 
 const bot = new Bot(Bun.env.BOT_TOKEN!);
 
 bot.command("start", (ctx) =>
   ctx.reply(
-    "Welcome to WateringReminder!\n\n" +
-      "Commands:\n" +
-      "/add <name> <days> - add a plant\n" +
-      "/list - show your plants\n" +
-      "/delete <number> - delete a plant by number\n" +
-      "/clearall - delete all your plants\n\n" +
-      "Tip: Send a photo with caption /add <name> <days> to add plant with image!"
+    "🌱 Добро пожаловать в WateringReminder!\n\n" +
+      "Команды:\n" +
+      "/add <имя> <дни> - добавить растение\n" +
+      "/list - список ваших растений\n" +
+      "/delete <номер> - удалить растение\n" +
+      "/clearall - удалить все растения\n" +
+      "/share <номер> - поделиться растением\n" +
+      "/shareall - поделиться всеми растениями\n" +
+      "/join <код> - присоединиться к растениям\n\n" +
+      "💡 Отправьте фото с подписью /add <имя> <дни> чтобы добавить с фото!"
   )
 );
 
@@ -37,14 +42,19 @@ bot.command("list", async (ctx) => {
 
 registerAddCommands(bot);
 registerDeleteCommands(bot);
+registerShareCommands(bot);
+registerJoinCommands(bot);
 startWateringChecker(bot);
 
 await bot.api.setMyCommands([
-  { command: "start", description: "Start the bot" },
-  { command: "add", description: "Add a plant: /add <name> <days> with photo (optional)" },
-  { command: "list", description: "Show your plants" },
-  { command: "delete", description: "Delete a plant: /delete <number>" },
-  { command: "clearall", description: "Delete all your plants" },
+  { command: "start", description: "Начать работу с ботом" },
+  { command: "add", description: "Добавить растение: /add <имя> <дни>" },
+  { command: "list", description: "Список ваших растений" },
+  { command: "delete", description: "Удалить растение: /delete <номер>" },
+  { command: "share", description: "Поделиться растением: /share <номер>" },
+  { command: "shareall", description: "Поделиться всеми растениями" },
+  { command: "join", description: "Присоединиться: /join <код>" },
+  { command: "clearall", description: "Удалить все растения" },
 ]);
 
 bot.start();
